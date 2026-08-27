@@ -51,7 +51,7 @@ export default function Products() {
 
     try {
       await axios.delete(
-        `http://localhost:3000/api/products/delete/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/products/delete/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -71,7 +71,7 @@ export default function Products() {
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/categories/view",
+        `${import.meta.env.VITE_API_URL}/api/categories/view`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -93,7 +93,7 @@ export default function Products() {
   const fetchProducts = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/products/products",
+        `${import.meta.env.VITE_API_URL}/api/products/products`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -135,7 +135,7 @@ export default function Products() {
   try {
     if (editingId) {
       await axios.put(
-        `http://localhost:3000/api/products/update/${editingId}`,
+        `${import.meta.env.VITE_API_URL}/api/products/update/${editingId}`,
         {
           product_name: form.name,
           product_price: Number(form.price),
@@ -150,7 +150,7 @@ export default function Products() {
       );
     } else {
       await axios.post(
-        "http://localhost:3000/api/products/create",
+        `${import.meta.env.VITE_API_URL}/api/products/create`,
         {
           product_name: form.name,
           product_price: Number(form.price),

@@ -57,7 +57,7 @@ const [products, setProducts] = useState([]);
   const deleteSale = async (saleId) => {
     try {
       await axios.delete(
-        `http://localhost:3000/api/sales/delete/${saleId}`,
+        `${import.meta.env.VITE_API_URL}/api/sales/delete/${saleId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -93,7 +93,7 @@ const [products, setProducts] = useState([]);
   const fetchSales = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/sales/view",
+        `${import.meta.env.VITE_API_URL}/api/sales/view`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -114,7 +114,7 @@ const [products, setProducts] = useState([]);
   const viewSaleDetails = async (saleId, customerName) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/sales/view/${saleId}`,
+        `${import.meta.env.VITE_API_URL}/api/sales/view/${saleId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -135,7 +135,7 @@ const [products, setProducts] = useState([]);
   const fetchCustomers = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/customers/view",
+      `${import.meta.env.VITE_API_URL}/api/customers/view`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -151,7 +151,7 @@ const [products, setProducts] = useState([]);
 const fetchProducts = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/products/products",
+      `${import.meta.env.VITE_API_URL}/api/products/products`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -174,7 +174,7 @@ const fetchProducts = async () => {
       }));
 
       await axios.post(
-        "http://localhost:3000/api/sales/create",
+        `${import.meta.env.VITE_API_URL}/api/sales/create`,
         {
           customer_id: Number(form.customer),
           sale_date: new Date().toISOString().slice(0, 10),

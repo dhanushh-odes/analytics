@@ -24,7 +24,7 @@ export default function Categories() {
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/categories/view",
+        `${import.meta.env.VITE_API_URL}/api/categories/view`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -55,7 +55,7 @@ export default function Categories() {
 
     try {
       await axios.delete(
-        `http://localhost:3000/api/categories/delete/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/categories/delete/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -96,7 +96,7 @@ export default function Categories() {
     try {
       if (editingId) {
         await axios.put(
-          `http://localhost:3000/api/categories/update/${editingId}`,
+          `${import.meta.env.VITE_API_URL}/api/categories/update/${editingId}`,
           {
             category_name: form.name,
           },
@@ -108,7 +108,7 @@ export default function Categories() {
         );
       } else {
         await axios.post(
-          "http://localhost:3000/api/categories/create",
+          `${import.meta.env.VITE_API_URL}/api/categories/create`,
           {
             category_name: form.name,
           },

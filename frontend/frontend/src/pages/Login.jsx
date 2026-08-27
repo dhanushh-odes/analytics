@@ -32,7 +32,7 @@ export default function Login() {
     console.log(form.identifier, form.password);
 
     const response = await axios.post(
-      "http://localhost:3000/api/auth/login",
+      `${import.meta.env.VITE_API_URL}/api/auth/login`,
       {
         identifier: form.identifier,
         password: form.password,

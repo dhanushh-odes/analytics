@@ -29,7 +29,7 @@ const [categories, setCategories] = useState([]);
     console.log("fetchSales called");
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/sales/view",
+      `${import.meta.env.VITE_API_URL}/api/sales/view`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -46,7 +46,7 @@ const [categories, setCategories] = useState([]);
 const fetchProducts = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/products/products",
+      `${import.meta.env.VITE_API_URL}/api/products/products`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -62,7 +62,7 @@ const fetchProducts = async () => {
 const fetchCustomers = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/customers/view",
+      `${import.meta.env.VITE_API_URL}/api/customers/view`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -78,7 +78,7 @@ const fetchCustomers = async () => {
 const fetchCategories = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/categories/view",
+      `${import.meta.env.VITE_API_URL}/api/categories/view`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

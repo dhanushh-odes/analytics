@@ -51,7 +51,7 @@ export default function Customers() {
   const fetchCustomers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/customers/view",
+        `${import.meta.env.VITE_API_URL}/api/customers/view`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -94,7 +94,7 @@ export default function Customers() {
 
     try {
       await axios.delete(
-        `http://localhost:3000/api/customers/delete/${customerId}`,
+        `${import.meta.env.VITE_API_URL}/api/customers/delete/${customerId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -127,7 +127,7 @@ export default function Customers() {
 
       if (editingId) {
         await axios.put(
-          `http://localhost:3000/api/customers/update/${editingId}`,
+          `${import.meta.env.VITE_API_URL}/api/customers/update/${editingId}`,
           {
             customer_name: form.name,
             customer_email: form.email,
@@ -142,7 +142,7 @@ export default function Customers() {
         );
       } else {
         await axios.post(
-          "http://localhost:3000/api/customers/create",
+          `${import.meta.env.VITE_API_URL}/api/customers/create`,
           {
             customer_name: form.name,
             customer_email: form.email,
