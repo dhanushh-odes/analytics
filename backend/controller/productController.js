@@ -75,7 +75,114 @@ export const getAllproducts= async(req,res)=>{
         
     }
 }
-export const deleteProduct=async(req,res)=>{
+export const updateProduct = async (req, res) => {
+    const { product_id } = req.params;
+    const userId = req.user.id;
+
+    try {
+        // Check product belongs to user
+        const existingProduct = await pool.query(
+            `SELECT p.*
+             FROM products p
+             JOIN category_of_products c
+             ON p.category_of_product_id = c.cat_id
+             WHERE p.product_id = $1
+             AND c.user_id = $2`,
+            [product_id, userId]
+        );
+
+        if (existingProduct.rows.length === 0) {
+            return res.status(404).json({
+                message: "Product not found"
+            });
+        }
+
+        const product = existingProduct.rows[0];
+
+        const updatedName =
+            req.body.product_name ?? product.product_name;
+
+        const updatedPrice =
+            req.body.product_price ?? product.product_price;
+
+        const updatedCategoryId =
+            req.body.category_of_product_id ??
+            product.category_of_product_id;
+
+        const updatedQuantity =
+            req.body.quantity ?? product.quantity;
+
+        // Validate numeric fields
+        if (
+            isNaN(Number(updatedPrice)) ||
+            isNaN(Number(updatedCategoryId)) ||
+            isNaN(Number(updatedQuantity))
+        ) {
+            return res.status(400).json({
+                message: "Invalid input type"
+            });
+        }
+
+        // Check category exists and belongs to user
+        const category = await pool.query(
+            `SELECT *
+             FROM category_of_products
+             WHERE cat_id = $1
+             AND user_id = $2`,
+            [updatedCategoryId, userId]
+        );
+
+        if (category.rows.length === 0) {
+            return res.status(404).json({
+                message: "Category not found"
+            });
+        }
+
+        // Prevent duplicate product names in same category
+        const duplicateProduct = await pool.query(
+            `SELECT *
+             FROM products
+             WHERE category_of_product_id = $1
+             AND product_name = $2
+             AND product_id != $3`,
+            [updatedCategoryId, updatedName, product_id]
+        );
+
+        if (duplicateProduct.rows.length > 0) {
+            return res.status(400).json({
+                message: "Product already exists"
+            });
+        }
+
+        const result = await pool.query(
+            `UPDATE products
+             SET product_name = $1,
+                 product_price = $2,
+                 category_of_product_id = $3,
+                 quantity = $4
+             WHERE product_id = $5
+             RETURNING *`,
+            [
+                updatedName,
+                Number(updatedPrice),
+                Number(updatedCategoryId),
+                Number(updatedQuantity),
+                product_id
+            ]
+        );
+
+        return res.status(200).json({
+            message: "Product updated successfully",
+            product: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+};export const deleteProduct=async(req,res)=>{
     const {product_id}=req.params;
     const userId = req.user.id;
     try {

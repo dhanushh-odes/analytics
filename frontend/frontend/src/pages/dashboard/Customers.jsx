@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Users, Mail, Phone, MapPin } from "lucide-react";
 import axios from "axios";
 
@@ -25,8 +25,20 @@ export default function Customers() {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
+  const openEditModal = (customer) => {
+    setEditingId(customer.id);
 
+    setForm({
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      city: customer.city,
+    });
+
+    setModalOpen(true);
+  };
   const filtered = customers.filter(
     (customer) =>
       customer.name
@@ -36,7 +48,7 @@ export default function Customers() {
         ?.toLowerCase()
         .includes(query.toLowerCase())
   );
-    const fetchCustomers = async () => {
+  const fetchCustomers = async () => {
     try {
       const response = await axios.get(
         "http://localhost:3000/api/customers/view",
@@ -53,8 +65,9 @@ export default function Customers() {
           email: customer.customer_email,
           phone: customer.phone_number,
           city: customer.city,
-          totalOrders: customer.totalOrders || 0,
-          totalSpent: customer.totalSpent || 0,
+
+          totalOrders: Number(customer.total_orders),
+          totalSpent: Number(customer.total_spent),
         }))
       );
     } catch (error) {
@@ -63,38 +76,44 @@ export default function Customers() {
   };
 
   useEffect(() => {
-  
-  fetchCustomers();
-}, []);
-const handleDelete = async (customerId) => {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this customer?"
-  );
 
-  if (!confirmDelete) return;
-
-  try {
-    await axios.delete(
-      `http://localhost:3000/api/customers/delete/${customerId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-
-    // Refresh customer list
     fetchCustomers();
-
-  } catch (error) {
-    console.error("Failed to delete customer:", error);
-
-    alert(
-      error.response?.data?.message ||
-      "Failed to delete customer"
+  }, []);
+  const openAddModal = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+    setModalOpen(true);
+  };
+  const handleDelete = async (customerId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this customer?"
     );
-  }
-};
+
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/customers/delete/${customerId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      // Refresh customer list
+      fetchCustomers();
+
+    } catch (error) {
+      console.error("Failed to delete customer:", error);
+
+      alert(
+        error.response?.data?.message ||
+        "Failed to delete customer"
+      );
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -106,58 +125,53 @@ const handleDelete = async (customerId) => {
     try {
       setError("");
 
-      const response = await axios.post(
-        "http://localhost:3000/api/customers/create",
-        {
-          customer_name: form.name,
-          customer_email: form.email,
-          phone_number: form.phone,
-          city: form.city,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+      if (editingId) {
+        await axios.put(
+          `http://localhost:3000/api/customers/update/${editingId}`,
+          {
+            customer_name: form.name,
+            customer_email: form.email,
+            phone_number: form.phone,
+            city: form.city,
           },
-        }
-      );
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      } else {
+        await axios.post(
+          "http://localhost:3000/api/customers/create",
+          {
+            customer_name: form.name,
+            customer_email: form.email,
+            phone_number: form.phone,
+            city: form.city,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      }
 
-
-      const newCustomer = {
-        id: response.data.customer.customer_id,
-
-        name: response.data.customer.customer_name,
-
-        email: response.data.customer.customer_email,
-
-        phone: response.data.customer.phone_number,
-
-        city: response.data.customer.city,
-
-        totalOrders: 0,
-
-        totalSpent: 0,
-      };
-
-
-      setCustomers((prev) => [
-        ...prev,
-        newCustomer,
-      ]);
-
+      fetchCustomers();
 
       setForm(emptyForm);
+      setEditingId(null);
       setModalOpen(false);
 
-
     } catch (error) {
-
       console.error(error);
 
       setError(
         error.response?.data?.message ||
-        "Failed to add customer"
+        (editingId
+          ? "Failed to update customer"
+          : "Failed to add customer")
       );
-
     }
   };
 
@@ -171,7 +185,7 @@ const handleDelete = async (customerId) => {
         action={
           <Button
             icon={Plus}
-            onClick={() => setModalOpen(true)}
+            onClick={openAddModal}
           >
             Add Customer
           </Button>
@@ -232,7 +246,7 @@ const handleDelete = async (customerId) => {
                     Total Spent
                   </th>
                   <th className="px-5 py-3">
-                       Actions
+                    Actions
                   </th>
                 </tr>
 
@@ -242,7 +256,7 @@ const handleDelete = async (customerId) => {
 
               <tbody>
 
-                {filtered.map((customer)=>(
+                {filtered.map((customer) => (
 
                   <tr
                     key={customer.id}
@@ -277,7 +291,7 @@ const handleDelete = async (customerId) => {
 
                       <div className="flex gap-2">
 
-                        <Mail size={14}/>
+                        <Mail size={14} />
 
                         {customer.email}
 
@@ -286,7 +300,7 @@ const handleDelete = async (customerId) => {
 
                       <div className="flex gap-2 mt-1 text-gray-500">
 
-                        <Phone size={14}/>
+                        <Phone size={14} />
 
                         {customer.phone}
 
@@ -301,7 +315,7 @@ const handleDelete = async (customerId) => {
 
                       <div className="flex gap-2">
 
-                        <MapPin size={14}/>
+                        <MapPin size={14} />
 
                         {customer.city}
 
@@ -324,23 +338,23 @@ const handleDelete = async (customerId) => {
                       ₹{customer.totalSpent.toLocaleString("en-IN")}
 
                     </td>
-                   <td className="px-5 py-3">
-  <div className="flex gap-2">
-    <button
-      onClick={() => handleEdit(customer)}
-      className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition"
-    >
-      Edit
-    </button>
+                    <td className="px-5 py-3">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => openEditModal(customer)}
+                          className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition"
+                        >
+                          Edit
+                        </button>
 
-    <button
-      onClick={() => handleDelete(customer.id)}
-      className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
-    >
-      Delete
-    </button>
-  </div>
-</td>
+                        <button
+                          onClick={() => handleDelete(customer.id)}
+                          className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
 
                   </tr>
 
@@ -376,10 +390,10 @@ const handleDelete = async (customerId) => {
 
             value={form.name}
 
-            onChange={(e)=>
+            onChange={(e) =>
               setForm({
                 ...form,
-                name:e.target.value
+                name: e.target.value
               })
             }
 
@@ -399,10 +413,10 @@ const handleDelete = async (customerId) => {
 
             value={form.email}
 
-            onChange={(e)=>
+            onChange={(e) =>
               setForm({
                 ...form,
-                email:e.target.value
+                email: e.target.value
               })
             }
 
@@ -420,10 +434,10 @@ const handleDelete = async (customerId) => {
 
             value={form.phone}
 
-            onChange={(e)=>
+            onChange={(e) =>
               setForm({
                 ...form,
-                phone:e.target.value
+                phone: e.target.value
               })
             }
 
@@ -441,10 +455,10 @@ const handleDelete = async (customerId) => {
 
             value={form.city}
 
-            onChange={(e)=>
+            onChange={(e) =>
               setForm({
                 ...form,
-                city:e.target.value
+                city: e.target.value
               })
             }
 

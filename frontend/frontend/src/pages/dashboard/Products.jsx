@@ -32,15 +32,17 @@ export default function Products() {
   };
 
   const openEditModal = (product) => {
-    setEditingId(product.id);
-    setForm({
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      stock: product.stock,
-    });
-    setModalOpen(true);
-  };
+  setEditingId(product.id);
+
+  setForm({
+    name: product.name,
+    category: product.categoryId,
+    price: product.price,
+    stock: product.stock,
+  });
+
+  setModalOpen(true);
+};
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this product?")) {
@@ -98,12 +100,13 @@ export default function Products() {
           },
         }
       );
- console.log(response.data.products);
+      console.log(response.data.products);
       setProducts(
         response.data.products.map((product) => ({
           id: product.product_id,
           name: product.product_name,
-          category: product.category_name,
+          categoryId: product.category_of_product_id,
+          categoryName: product.category_name,
           price: product.product_price,
           stock: product.quantity,
         }))
@@ -118,18 +121,34 @@ export default function Products() {
     fetchCategories();
   }, []);
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (
-      !form.name ||
-      !form.category ||
-      !form.price ||
-      !form.stock
-    ) {
-      return;
-    }
+  if (
+    !form.name ||
+    !form.category ||
+    !form.price ||
+    !form.stock
+  ) {
+    return;
+  }
 
-    try {
+  try {
+    if (editingId) {
+      await axios.put(
+        `http://localhost:3000/api/products/update/${editingId}`,
+        {
+          product_name: form.name,
+          product_price: Number(form.price),
+          category_of_product_id: Number(form.category),
+          quantity: Number(form.stock),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+    } else {
       await axios.post(
         "http://localhost:3000/api/products/create",
         {
@@ -144,27 +163,20 @@ export default function Products() {
           },
         }
       );
-
-      fetchProducts();
-
-      setForm({
-        name: "",
-        category: "",
-        price: "",
-        stock: "",
-      });
-
-      setModalOpen(false);
-
-    } catch (error) {
-      console.error(
-        "Failed to create product:",
-        error.response?.data || error
-      );
     }
-  };
 
-  return (
+    fetchProducts();
+
+    setForm(emptyForm);
+    setEditingId(null);
+    setModalOpen(false);
+
+  } catch (error) {
+    console.error(
+      error.response?.data || error
+    );
+  }
+};  return (
     <div>
       <PageHeader
         title="Products"
@@ -209,7 +221,7 @@ export default function Products() {
                     <td className="px-5 py-3.5 font-medium text-gray-900">
                       {product.name}
                     </td>
-                    <td className="px-5 py-3.5 text-gray-600">{product.category}</td>
+                    <td className="px-5 py-3.5 text-gray-600">{product.categoryName}</td>
                     <td className="px-5 py-3.5 text-gray-700">
                       ₹{Number(product.price).toLocaleString("en-IN")}
                     </td>

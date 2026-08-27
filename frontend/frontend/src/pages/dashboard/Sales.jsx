@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Plus, ShoppingCart, Filter } from "lucide-react";
-import salesData from "../../data/sales";
+
 
 import PageHeader from "../../components/ui/PageHeader";
 import SearchInput from "../../components/ui/SearchInput";
